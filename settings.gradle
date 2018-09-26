@@ -1,0 +1,1 @@
+include ':app',':cns_android_sdk'
