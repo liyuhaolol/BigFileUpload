@@ -2,10 +2,14 @@ package cn.lyh.spa.bigfileupload;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
@@ -14,9 +18,11 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import cn.lyh.spa.bigfileupload.network.HttpConstants;
+import cn.lyh.spa.bigfileupload.utils.MMM;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5utils;
 import spa.lyh.cn.peractivity.PermissionActivity;
+import spa.lyh.cn.utils_io.IOUtils;
 
 public class MainActivity extends PermissionActivity {
     private TextView path,process,md5T,size;
@@ -37,7 +43,13 @@ public class MainActivity extends PermissionActivity {
         process = findViewById(R.id.process);
         size = findViewById(R.id.size);
         md5T = findViewById(R.id.md5);
-        MD5utils.getFileMD5sync(path.getText().toString(), new MD5resultListener() {
+        /*MD5utils.getFileMD5sync(this,path.getText().toString(), new MD5resultListener() {
+            @Override
+            public void onResult(String md5) {
+                md5T.setText(md5);
+            }
+        });*/
+        MD5utils.getFileMD5sync1(path.getText().toString(), new MD5resultListener() {
             @Override
             public void onResult(String md5) {
                 md5T.setText(md5);
@@ -107,14 +119,20 @@ public class MainActivity extends PermissionActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
-            /*stringPath = CnsCommonUtil.getFilePathByUri(this, uri);
+            stringPath = MMM.getFilePathByUri(this, uri);
             path.setText(stringPath);
-            MD5utils.getFileMD5sync(stringPath, new MD5resultListener() {
+            /*MD5utils.getFileMD5sync(this,stringPath, new MD5resultListener() {
                 @Override
                 public void onResult(String md5) {
                     md5T.setText(md5);
                 }
             });*/
+            MD5utils.getFileMD5sync1(stringPath, new MD5resultListener() {
+                @Override
+                public void onResult(String md5) {
+                    md5T.setText(md5);
+                }
+            });
         }
     }
 

@@ -22,4 +22,5 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'spa.lyh.cn:peractivity:1.0.3'//权限
     implementation 'spa.lyh.cn:lib_https:1.0.7'//网络框架
+    implementation 'spa.lyh.cn:lib_io:1.0.5'//io工具
 }
