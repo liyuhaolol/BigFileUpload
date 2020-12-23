@@ -4,27 +4,19 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import androidx.annotation.Nullable;
 
-import cns.workspace.lib.androidsdk.activity.PermissionActivity;
-import cns.workspace.lib.androidsdk.httputils.BigFileUploadCenter;
-import cns.workspace.lib.androidsdk.httputils.CommonOkHttpClient;
-import cns.workspace.lib.androidsdk.httputils.listener.DisposeDataHandle;
-import cns.workspace.lib.androidsdk.httputils.listener.DisposeUploadListener;
-import cns.workspace.lib.androidsdk.httputils.request.CommonRequest;
-import cns.workspace.lib.androidsdk.utils.CnsCommonUtil;
-import cns.workspace.lib.androidsdk.utils.md5.MD5resultListener;
-import cns.workspace.lib.androidsdk.utils.md5.MD5utils;
+import cn.lyh.spa.bigfileupload.network.HttpConstants;
+import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
+import cn.lyh.spa.bigfileupload.utils.md5.MD5utils;
+import spa.lyh.cn.peractivity.PermissionActivity;
 
 public class MainActivity extends PermissionActivity {
     private TextView path,process,md5T,size;
@@ -34,8 +26,6 @@ public class MainActivity extends PermissionActivity {
     private String md5String;
 
     private long startOffSet = 0;
-
-    private BigFileUploadCenter center;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +43,7 @@ public class MainActivity extends PermissionActivity {
                 md5T.setText(md5);
             }
         });
-        hasPermission(NOT_REQUIRED_ONLY_REQUEST, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        askForPermission(NOT_REQUIRED_ONLY_REQUEST, Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
 
@@ -73,13 +63,15 @@ public class MainActivity extends PermissionActivity {
                 }
                 break;
             case R.id.stop:
-                center.stopUpload();
+                //center.stopUpload();
+            case R.id.android10:
+
                 break;
         }
     }
 
     private void uploadFile(String url,String filePath){
-        center = new BigFileUploadCenter( url,filePath,true, new DisposeUploadListener() {
+        /*center = new BigFileUploadCenter( url,filePath,true, new DisposeUploadListener() {
             @Override
             public void onPiceSuccess(int progress, String currentSize, String sumSize) {
                 process.setText(progress+"%");
@@ -102,7 +94,7 @@ public class MainActivity extends PermissionActivity {
                 startOffSet = startOffset;
             }
         });
-        center.start(startOffSet);
+        center.start(startOffSet);*/
     }
 
 
@@ -110,20 +102,19 @@ public class MainActivity extends PermissionActivity {
         Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
     }
 
-
-
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
-            stringPath = CnsCommonUtil.getFilePathByUri(this, uri);
+            /*stringPath = CnsCommonUtil.getFilePathByUri(this, uri);
             path.setText(stringPath);
             MD5utils.getFileMD5sync(stringPath, new MD5resultListener() {
                 @Override
                 public void onResult(String md5) {
                     md5T.setText(md5);
                 }
-            });
+            });*/
         }
     }
 

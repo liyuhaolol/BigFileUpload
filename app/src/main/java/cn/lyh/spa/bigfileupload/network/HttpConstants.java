@@ -1,4 +1,4 @@
-package cn.lyh.spa.bigfileupload;
+package cn.lyh.spa.bigfileupload.network;
 
 
 /**

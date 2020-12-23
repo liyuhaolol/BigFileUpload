@@ -2,7 +2,7 @@ package cns.workspace.lib.androidsdk.httputils;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -15,12 +15,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import cns.workspace.lib.androidsdk.httputils.listener.DisposeUploadListener;
-import cns.workspace.lib.androidsdk.httputils.response.CommonFileCallback;
 import cns.workspace.lib.androidsdk.utils.CnsCommonUtil;
-import cns.workspace.lib.androidsdk.utils.md5.MD5resultListener;
 import cns.workspace.lib.androidsdk.utils.md5.MD5utils;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;

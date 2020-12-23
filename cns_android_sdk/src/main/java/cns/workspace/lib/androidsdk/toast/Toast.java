@@ -2,13 +2,10 @@ package cns.workspace.lib.androidsdk.toast;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.StringRes;
-import android.view.LayoutInflater;
-import android.view.View;
+import androidx.annotation.StringRes;
+
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import cns.workspace.lib.androidsdk.R;
 
 public class Toast {
     public @interface Duration {

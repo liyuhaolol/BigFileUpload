@@ -5,22 +5,18 @@ import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.signature.ObjectKey;
-
-import java.security.MessageDigest;
 
 /**
  * Created by liyuhao on 2017/6/7.
@@ -88,7 +84,7 @@ public class ImageLoadUtil {
         }
     }
 
-    public static void displayImage(android.support.v4.app.Fragment fragment, Object res, ImageView target) {
+    public static void displayImage(androidx.fragment.app.Fragment fragment, Object res, ImageView target) {
         if (options != null) {
             Glide.with(fragment)
                     .asDrawable()
@@ -172,7 +168,7 @@ public class ImageLoadUtil {
         }
     }
 
-    public static void displayImage(android.support.v4.app.Fragment fragment, Object res, ImageView target, RequestOptions option) {
+    public static void displayImage(androidx.fragment.app.Fragment fragment, Object res, ImageView target, RequestOptions option) {
         RequestBuilder<Drawable> builder;
         if (options != null) {
 

@@ -1,4 +1,4 @@
-package cns.workspace.lib.androidsdk.utils.md5;
+package cn.lyh.spa.bigfileupload.utils.md5;
 
 import android.os.Handler;
 import android.os.Looper;

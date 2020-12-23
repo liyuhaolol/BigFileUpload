@@ -36,6 +36,12 @@
             android:layout_height="wrap_content"
             android:text="结束"
             android:onClick="onClick"/>
+        <Button
+            android:id="@+id/android10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Android10测试分片"
+            android:onClick="onClick"/>
     </LinearLayout>
 
     <TextView
