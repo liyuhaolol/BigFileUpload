@@ -17,8 +17,13 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
 import cn.lyh.spa.bigfileupload.network.HttpConstants;
 import cn.lyh.spa.bigfileupload.utils.MMM;
+import cn.lyh.spa.bigfileupload.utils.fenpian.FenPian;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5utils;
 import spa.lyh.cn.peractivity.PermissionActivity;
@@ -33,6 +38,8 @@ public class MainActivity extends PermissionActivity {
 
     private long startOffSet = 0;
 
+    FileInputStream fis;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,13 +50,7 @@ public class MainActivity extends PermissionActivity {
         process = findViewById(R.id.process);
         size = findViewById(R.id.size);
         md5T = findViewById(R.id.md5);
-        /*MD5utils.getFileMD5sync(this,path.getText().toString(), new MD5resultListener() {
-            @Override
-            public void onResult(String md5) {
-                md5T.setText(md5);
-            }
-        });*/
-        MD5utils.getFileMD5sync1(path.getText().toString(), new MD5resultListener() {
+        MD5utils.getFileMD5sync(this,path.getText().toString(), new MD5resultListener() {
             @Override
             public void onResult(String md5) {
                 md5T.setText(md5);
@@ -77,7 +78,11 @@ public class MainActivity extends PermissionActivity {
             case R.id.stop:
                 //center.stopUpload();
             case R.id.android10:
-
+                if (fis != null){
+                    FenPian.test(fis);
+                }else {
+                    showToast("没有文件流");
+                }
                 break;
         }
     }
@@ -121,18 +126,22 @@ public class MainActivity extends PermissionActivity {
             Uri uri = data.getData();
             stringPath = MMM.getFilePathByUri(this, uri);
             path.setText(stringPath);
-            /*MD5utils.getFileMD5sync(this,stringPath, new MD5resultListener() {
-                @Override
-                public void onResult(String md5) {
-                    md5T.setText(md5);
-                }
-            });*/
-            MD5utils.getFileMD5sync1(stringPath, new MD5resultListener() {
-                @Override
-                public void onResult(String md5) {
-                    md5T.setText(md5);
-                }
-            });
+
+            try{
+                fis = (FileInputStream) getContentResolver().openInputStream(uri);
+            }catch (FileNotFoundException e){
+                e.printStackTrace();
+            }
+            if (fis != null){
+                MD5utils.getFileMD5sync(fis, new MD5resultListener() {
+                    @Override
+                    public void onResult(String md5) {
+                        md5T.setText(md5);
+                    }
+                });
+            }else {
+                md5T.setText("");
+            }
         }
     }
 

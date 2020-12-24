@@ -14,62 +14,6 @@ import spa.lyh.cn.utils_io.IOUtils;
 public class MD5utils {
 
 
-    public static void getFileMD5sync1(String path, MD5resultListener listener) {
-        File file = new File(path);
-        getFileMD5sync1(file,listener);
-
-    }
-
-
-    public static void getFileMD5sync1(final File file, final MD5resultListener listener) {
-        final Handler handler = new Handler(Looper.getMainLooper());
-        if (!file.isFile()) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    listener.onResult("");
-                }
-            });
-            return;
-        }
-        final MessageDigest[] digest = {null};
-        final FileInputStream[] in = {null};
-        final byte buffer[] = new byte[4 * 1024];
-        final int[] len = new int[1];
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    digest[0] = MessageDigest.getInstance("MD5");
-                    in[0] = new FileInputStream(file);
-                    while ((len[0] = in[0].read(buffer)) != -1) {
-                        digest[0].update(buffer, 0, len[0]);
-                    }
-                    in[0].close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onResult("");
-                        }
-                    });
-                }
-
-                final BigInteger bigInt = new BigInteger(1, digest[0].digest());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onResult(bigInt.toString(16));
-                    }
-                });
-            }
-        });
-
-        thread.start();
-    }
-
-
 
     public static void getFileMD5sync(Context context,String filePath, MD5resultListener listener) {
         if (listener != null){
@@ -112,6 +56,13 @@ public class MD5utils {
                         digest[0].update(buffer, 0, len[0]);
                     }
                     fis.close();
+                    final BigInteger bigInt = new BigInteger(1, digest[0].digest());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onResult(bigInt.toString(16));
+                        }
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                     handler.post(new Runnable() {
@@ -121,14 +72,6 @@ public class MD5utils {
                         }
                     });
                 }
-
-                final BigInteger bigInt = new BigInteger(1, digest[0].digest());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onResult(bigInt.toString(16));
-                    }
-                });
             }
         });
 
@@ -164,12 +107,11 @@ public class MD5utils {
                 digest[0].update(buffer, 0, len[0]);
             }
             fis.close();
+            final BigInteger bigInt = new BigInteger(1, digest[0].digest());
+            return bigInt.toString(16);
         } catch (Exception e) {
             e.printStackTrace();
             return "";
         }
-
-        final BigInteger bigInt = new BigInteger(1, digest[0].digest());
-        return bigInt.toString(16);
     }
 }

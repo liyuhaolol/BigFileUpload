@@ -48,6 +48,9 @@ public class MMM {
                 } else if (isDownloadsDocument(uri)) {
                     // DownloadsProvider
                     final String id = DocumentsContract.getDocumentId(uri);
+                    if (id.startsWith("raw:")) {
+                        return id.replaceFirst("raw:", "");
+                    }
                     final Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),
                             Long.valueOf(id));
                     path = getDataColumn(context, contentUri, null, null);
@@ -70,6 +73,26 @@ public class MMM {
                     path = getDataColumn(context, contentUri, selection, selectionArgs);
                     return path;
                 }
+            }else {
+                final String scheme = uri.getScheme();
+                String data = null;
+                if ( scheme == null )
+                    data = uri.getPath();
+                else if ( ContentResolver.SCHEME_FILE.equals( scheme ) ) {
+                    data = uri.getPath();
+                } else if ( ContentResolver.SCHEME_CONTENT.equals( scheme ) ) {
+                    Cursor cursor = context.getContentResolver().query( uri, new String[] { MediaStore.Video.VideoColumns.DATA }, null, null, null );
+                    if ( null != cursor ) {
+                        if ( cursor.moveToFirst() ) {
+                            int index = cursor.getColumnIndex( MediaStore.Video.VideoColumns.DATA );
+                            if ( index > -1 ) {
+                                data = cursor.getString( index );
+                            }
+                        }
+                        cursor.close();
+                    }
+                }
+                return data;
             }
         }
         return null;
