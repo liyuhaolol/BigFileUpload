@@ -22,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import cn.lyh.spa.bigfileupload.network.HttpConstants;
+import cn.lyh.spa.bigfileupload.utils.MIOUtils;
 import cn.lyh.spa.bigfileupload.utils.MMM;
 import cn.lyh.spa.bigfileupload.utils.fenpian.FenPian;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
@@ -38,7 +39,7 @@ public class MainActivity extends PermissionActivity {
 
     private long startOffSet = 0;
 
-    FileInputStream fis;
+    Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +79,10 @@ public class MainActivity extends PermissionActivity {
             case R.id.stop:
                 //center.stopUpload();
             case R.id.android10:
-                if (fis != null){
-                    FenPian.test(fis);
+                if (uri != null){
+                    FenPian.test(MIOUtils.getFileInPutStream(this,uri));
                 }else {
-                    showToast("没有文件流");
+                    showToast("没有文件信息");
                 }
                 break;
         }
@@ -123,15 +124,11 @@ public class MainActivity extends PermissionActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
-            Uri uri = data.getData();
+            uri = data.getData();
             stringPath = MMM.getFilePathByUri(this, uri);
             path.setText(stringPath);
 
-            try{
-                fis = (FileInputStream) getContentResolver().openInputStream(uri);
-            }catch (FileNotFoundException e){
-                e.printStackTrace();
-            }
+            FileInputStream fis = MIOUtils.getFileInPutStream(this,uri);
             if (fis != null){
                 MD5utils.getFileMD5sync(fis, new MD5resultListener() {
                     @Override
