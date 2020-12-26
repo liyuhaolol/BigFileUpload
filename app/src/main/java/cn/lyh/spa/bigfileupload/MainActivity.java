@@ -28,6 +28,7 @@ import cn.lyh.spa.bigfileupload.network.HttpConstants;
 import cn.lyh.spa.bigfileupload.utils.MIOUtils;
 import cn.lyh.spa.bigfileupload.utils.MMM;
 import cn.lyh.spa.bigfileupload.utils.fenpian.FenPian;
+import cn.lyh.spa.bigfileupload.utils.fenpian.FinishListener;
 import cn.lyh.spa.bigfileupload.utils.fenpian.Fthread;
 import cn.lyh.spa.bigfileupload.utils.fenpian.Mthread;
 import cn.lyh.spa.bigfileupload.utils.fenpian.ThreadPool;
@@ -47,6 +48,8 @@ public class MainActivity extends PermissionActivity {
 
     Uri uri;
 
+    ThreadPool pool;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,10 +68,15 @@ public class MainActivity extends PermissionActivity {
         });
         askForPermission(NOT_REQUIRED_ONLY_REQUEST, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        ThreadPool pool = new ThreadPool();
+        pool = new ThreadPool();
         pool.start();
 
-        Log.e("qwer","结尾");
+        pool.setFinishListener(new FinishListener() {
+            @Override
+            public void finish() {
+                Log.e("qwer","执行结束");
+            }
+        });
     }
 
 
@@ -89,6 +97,10 @@ public class MainActivity extends PermissionActivity {
                 break;
             case R.id.stop:
                 //center.stopUpload();
+                if (pool != null){
+                    pool.stopPoolThread();
+                }
+                break;
             case R.id.android10:
                 if (uri != null){
                     FenPian.test(this,uri);

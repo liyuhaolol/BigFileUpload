@@ -17,7 +17,7 @@ public class Mthread extends Thread{
             sleep(5000);
             Log.e("qwer","线程"+number+"等待结束");
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 }
