@@ -13,36 +13,39 @@ import java.nio.channels.FileChannel;
 import cn.lyh.spa.bigfileupload.utils.MIOUtils;
 
 public class FenPian {
-
-
+    private static Uri mUri;
 
     /**
      * 上传前准备操作
      */
-    public static void test(FileInputStream fis){
-        if (fis != null){
-            try{
-                FileChannel channel = fis.getChannel();
-                long fileSize = channel.size();
-                Log.e("qwer",String.valueOf(fileSize));
-
-            }catch (Exception e){
-                e.printStackTrace();
+    public static void test(Context context ,Uri uri){
+        mUri = uri;
+        try{
+            FileInputStream sizeStream = MIOUtils.getFileInPutStream(context,mUri);
+            if (sizeStream != null){
+                FileChannel channel = sizeStream.getChannel();
+                if (channel != null){
+                    long fileSize = channel.size();
+                    Log.e("qwer","文件大小为：" + fileSize);
+                    channel.close();
+                    sizeStream.close();
+                }else {
+                    Log.e("qwer","通道为null");
+                }
+                //读取文件大小结束
+                Fthread f1 = new Fthread(context,mUri,0);
+                Fthread f2 = new Fthread(context,mUri,1);
+                f1.start();
+                f2.start();
+            }else {
+                Log.e("qwer","流为null");
             }
-        }else {
-            Log.e("qwer","流为null");
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
     }
 
-    /**
-     * 读一片
-     * @return
-     * @throws IOException
-     */
-    private static ByteBuffer[] readPice(FileChannel channel) throws IOException {
-        ByteBuffer[] byteBuffer = new ByteBuffer[1*1024*1024];
-        //byte[] datas = new byte[1*1024*1024];
-        channel.read(byteBuffer,0, 1*1024*1024);
-        return byteBuffer;
-    }
+
 }

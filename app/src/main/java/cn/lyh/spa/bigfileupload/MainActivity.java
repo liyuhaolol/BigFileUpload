@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,11 +21,16 @@ import androidx.annotation.Nullable;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import cn.lyh.spa.bigfileupload.network.HttpConstants;
 import cn.lyh.spa.bigfileupload.utils.MIOUtils;
 import cn.lyh.spa.bigfileupload.utils.MMM;
 import cn.lyh.spa.bigfileupload.utils.fenpian.FenPian;
+import cn.lyh.spa.bigfileupload.utils.fenpian.Fthread;
+import cn.lyh.spa.bigfileupload.utils.fenpian.Mthread;
+import cn.lyh.spa.bigfileupload.utils.fenpian.ThreadPool;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5utils;
 import spa.lyh.cn.peractivity.PermissionActivity;
@@ -58,6 +64,11 @@ public class MainActivity extends PermissionActivity {
             }
         });
         askForPermission(NOT_REQUIRED_ONLY_REQUEST, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        ThreadPool pool = new ThreadPool();
+        pool.start();
+
+        Log.e("qwer","结尾");
     }
 
 
@@ -80,7 +91,7 @@ public class MainActivity extends PermissionActivity {
                 //center.stopUpload();
             case R.id.android10:
                 if (uri != null){
-                    FenPian.test(MIOUtils.getFileInPutStream(this,uri));
+                    FenPian.test(this,uri);
                 }else {
                     showToast("没有文件信息");
                 }
