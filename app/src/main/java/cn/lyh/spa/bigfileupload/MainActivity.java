@@ -30,6 +30,7 @@ import cn.lyh.spa.bigfileupload.utils.MMM;
 import cn.lyh.spa.bigfileupload.utils.fenpian.FenPian;
 import cn.lyh.spa.bigfileupload.utils.fenpian.FinishListener;
 import cn.lyh.spa.bigfileupload.utils.fenpian.Fthread;
+import cn.lyh.spa.bigfileupload.utils.fenpian.MessageThread;
 import cn.lyh.spa.bigfileupload.utils.fenpian.Mthread;
 import cn.lyh.spa.bigfileupload.utils.fenpian.ThreadPool;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
@@ -48,7 +49,7 @@ public class MainActivity extends PermissionActivity {
 
     Uri uri;
 
-    ThreadPool pool;
+    MessageThread msgT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +69,15 @@ public class MainActivity extends PermissionActivity {
         });
         askForPermission(NOT_REQUIRED_ONLY_REQUEST, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        pool = new ThreadPool();
-        pool.start();
+        msgT = new MessageThread();
+        msgT.startPoolThread();
 
-        pool.setFinishListener(new FinishListener() {
+        /*pool.setFinishListener(new FinishListener() {
             @Override
             public void finish() {
                 Log.e("qwer","执行结束");
             }
-        });
+        });*/
     }
 
 
@@ -89,16 +90,19 @@ public class MainActivity extends PermissionActivity {
                 startActivityForResult(intent, 1);
                 break;
             case R.id.start:
-                if (!TextUtils.isEmpty(path.getText().toString())){
+                /*if (!TextUtils.isEmpty(path.getText().toString())){
 
                     md5String = md5T.getText().toString();
                     uploadFile(HttpConstants.UPLOAD_URL,stringPath);
+                }*/
+                if (msgT != null){
+                    msgT.startPoolThread();
                 }
                 break;
             case R.id.stop:
                 //center.stopUpload();
-                if (pool != null){
-                    pool.stopPoolThread();
+                if (msgT != null){
+                    msgT.stopPoolThread();
                 }
                 break;
             case R.id.android10:

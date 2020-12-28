@@ -1,6 +1,11 @@
 package cn.lyh.spa.bigfileupload.utils.fenpian;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -8,6 +13,11 @@ import java.util.concurrent.Executors;
 public class ThreadPool extends Thread{
     ExecutorService service;
     FinishListener listener;
+    private Handler handler;
+
+    public ThreadPool(Handler handler){
+        this.handler = handler;
+    }
 
 
     @Override
@@ -15,7 +25,7 @@ public class ThreadPool extends Thread{
         super.run();
         service = Executors.newFixedThreadPool(3);
         for (int i=1;i<=20;i++){
-            service.execute(new Mthread(i));
+            service.execute(new Mthread(i,handler));
         }
         service.shutdown();
         while (!service.isTerminated()){
@@ -23,6 +33,11 @@ public class ThreadPool extends Thread{
         }
         if (listener != null){
             listener.finish();
+        }
+        Message msg = Message.obtain();
+        msg.what = 1;
+        if (handler != null){
+            handler.sendMessage(msg);
         }
 
     }
@@ -33,7 +48,12 @@ public class ThreadPool extends Thread{
         }
     }
 
+
     public void setFinishListener(FinishListener listener){
         this.listener = listener;
+    }
+
+    private void initHandler(){
+
     }
 }
