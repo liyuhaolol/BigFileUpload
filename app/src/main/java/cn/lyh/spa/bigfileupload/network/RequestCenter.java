@@ -2,12 +2,15 @@ package cn.lyh.spa.bigfileupload.network;
 
 
 import android.app.Activity;
+import android.content.Context;
+import android.net.Uri;
 import android.os.HandlerThread;
 
 import com.alibaba.fastjson.TypeReference;
 
 import java.io.File;
 
+import cn.lyh.spa.bigfileupload.utils.fenpian.MultipartUploadCenter;
 import okhttp3.Call;
 import spa.lyh.cn.lib_https.HttpClient;
 import spa.lyh.cn.lib_https.listener.DisposeDataHandle;
@@ -43,4 +46,26 @@ public class RequestCenter {
     /*public static void uploadBigFile(String path , DisposeUploadListener listener){
         HandlerThread thread = new HandlerThread("1");
     }*/
+
+
+
+    //这里暂时优先使用uri。后期补充。
+    public static void uploadPic(Context context, String identification, Uri uri){
+        RequestParams bodyParams = new RequestParams();
+
+        /*bodyParams.put("videoIdentification", id);
+
+         */
+        //传图片用的参数
+        bodyParams.put("siteId", String.valueOf(1));
+        bodyParams.put("identification", identification);
+        //bodyParams.put("videoIdentification", identification);
+        //
+        //bodyParams.put("fileOriName",a);
+        /*bodyParams.put("videoName",a );
+        bodyParams.put("videoCallback",HttpUrl.VIDEO_CALLBACK);*/
+        /*bodyParams.put("chunk", String.valueOf(chunk));
+        bodyParams.put("chunks", String.valueOf(chunks));*/
+        new MultipartUploadCenter(context,HttpConstants.UPLOAD_PIC,HttpConstants.MERGE_PIC,bodyParams,uri);
+    }
 }

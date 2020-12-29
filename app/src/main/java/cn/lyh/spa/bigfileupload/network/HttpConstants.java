@@ -8,4 +8,12 @@ package cn.lyh.spa.bigfileupload.network;
 public class HttpConstants {
     public static final String UPLOAD_URL = "http://10.8.10.87:8080/TranserServer/upload";
 
+
+
+    //分片上传图片
+    public static final String UPLOAD_PIC = "http://testcms.newszu.com/uploadBySplit";
+
+    //合并图片接口
+    public static final String MERGE_PIC = "http://testcms.newszu.com/mergeFile";
+
 }

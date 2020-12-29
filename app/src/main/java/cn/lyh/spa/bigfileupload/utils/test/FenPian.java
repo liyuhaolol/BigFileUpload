@@ -1,13 +1,10 @@
-package cn.lyh.spa.bigfileupload.utils.fenpian;
+package cn.lyh.spa.bigfileupload.utils.test;
 
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import cn.lyh.spa.bigfileupload.utils.MIOUtils;

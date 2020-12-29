@@ -1,41 +1,46 @@
 package cn.lyh.spa.bigfileupload.utils.fenpian;
 
+import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import cn.lyh.spa.bigfileupload.utils.test.Mthread;
+
 public class ThreadPool extends Thread{
     ExecutorService service;
-    FinishListener listener;
-    private Handler handler;
 
-    public ThreadPool(Handler handler){
+    private final Handler handler;
+    private Object res;
+    private int threads;
+    private long chunks;
+    private int pieceSize;
+
+    public ThreadPool(Handler handler, Object res,int threads,long chunks,int pieceSize){
         this.handler = handler;
+        this.res = res;
+        this.threads = threads;
+        this.chunks = chunks;
+        this.pieceSize = pieceSize;
     }
 
 
     @Override
     public void run() {
         super.run();
-        service = Executors.newFixedThreadPool(3);
-        for (int i=1;i<=20;i++){
+        service = Executors.newFixedThreadPool(threads);
+        for (int i = 0;i < chunks; i++){
             service.execute(new Mthread(i,handler));
         }
         service.shutdown();
         while (!service.isTerminated()){
             //线程阻塞
         }
-        if (listener != null){
-            listener.finish();
-        }
+
         Message msg = Message.obtain();
-        msg.what = 1;
+        msg.what = MultipartUploadCenter.TASK_FINISH;
         if (handler != null){
             handler.sendMessage(msg);
         }
@@ -48,12 +53,4 @@ public class ThreadPool extends Thread{
         }
     }
 
-
-    public void setFinishListener(FinishListener listener){
-        this.listener = listener;
-    }
-
-    private void initHandler(){
-
-    }
 }

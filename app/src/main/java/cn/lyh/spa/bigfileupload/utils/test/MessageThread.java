@@ -1,4 +1,4 @@
-package cn.lyh.spa.bigfileupload.utils.fenpian;
+package cn.lyh.spa.bigfileupload.utils.test;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -7,7 +7,9 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-public class MessageThread extends Thread{
+import cn.lyh.spa.bigfileupload.utils.fenpian.ThreadPool;
+
+public class MessageThread extends Thread implements Runnable{
     private Handler handler;
     private ThreadPool pool;
 
