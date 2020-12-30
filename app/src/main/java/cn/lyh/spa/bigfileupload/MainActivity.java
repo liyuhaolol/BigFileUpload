@@ -55,15 +55,16 @@ public class MainActivity extends PermissionActivity {
             }
         });
         askForPermission(NOT_REQUIRED_ONLY_REQUEST, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
     }
 
 
     public void onClick(View v){
         switch (v.getId()){
             case R.id.select:
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.setType("*/*");//无类型限制
+                String[] mimetypes = {"image/*", "video/*","audio/*"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(intent, 1);
                 break;

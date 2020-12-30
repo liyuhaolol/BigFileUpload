@@ -13,6 +13,8 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.alibaba.fastjson.TypeReference;
 
+import java.io.File;
+
 import spa.lyh.cn.lib_https.HttpClient;
 import spa.lyh.cn.lib_https.listener.DisposeDataHandle;
 import spa.lyh.cn.lib_https.listener.DisposeDataListener;
@@ -94,16 +96,19 @@ public class MultipartUploadCenter {
         return this;
     }
 
-    public MultipartUploadCenter setUp(Context context,String uploadUrl, String mergeUrl, RequestParams bodyParams,RequestParams headerParams,Uri uri,boolean isDev,UploadTaskListener listener){
+    public MultipartUploadCenter setUp(Context context,String uploadUrl, String mergeUrl, RequestParams bodyParams,RequestParams headerParams,Object res,boolean isDev,UploadTaskListener listener){
         this.context = context;
-        this.res = uri;
         this.bodyParams = bodyParams;
         this.uploadUrl = uploadUrl;
         this.mergeUrl = mergeUrl;
         this.headerParams = headerParams;
         this.isDev = isDev;
         this.listener = listener;
-        initFileInfo(uri);
+        if (res instanceof String){}else if (res instanceof File){}else if (res instanceof Uri){}else {
+            Log.e(TAG,"上传文件只能为String型路径，File型文件，Uri型文件");
+        }
+        this.res = res;
+        initFileInfo(null);
         prepare();//发送前准备工作
         return this;
     }
