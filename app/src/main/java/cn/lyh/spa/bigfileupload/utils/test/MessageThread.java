@@ -38,11 +38,6 @@ public class MessageThread extends Thread implements Runnable{
         Log.e("qwer","消息中心关闭");
     }
 
-    public void startPoolThread(){
-        pool = new ThreadPool(handler);
-        pool.start();
-    }
-
     public void stopPoolThread(){
         if (pool != null){
             pool.stopPoolThread();

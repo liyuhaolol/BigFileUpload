@@ -10,7 +10,9 @@ import com.alibaba.fastjson.TypeReference;
 
 import java.io.File;
 
+import cn.lyh.spa.bigfileupload.BuildConfig;
 import cn.lyh.spa.bigfileupload.utils.fenpian.MultipartUploadCenter;
+import cn.lyh.spa.bigfileupload.utils.fenpian.UploadTaskListener;
 import okhttp3.Call;
 import spa.lyh.cn.lib_https.HttpClient;
 import spa.lyh.cn.lib_https.listener.DisposeDataHandle;
@@ -50,7 +52,7 @@ public class RequestCenter {
 
 
     //这里暂时优先使用uri。后期补充。
-    public static void uploadPic(Context context, String identification, Uri uri){
+    public static void uploadPic(Context context, String identification, Uri uri, UploadTaskListener listener){
         RequestParams bodyParams = new RequestParams();
 
         /*bodyParams.put("videoIdentification", id);
@@ -66,6 +68,15 @@ public class RequestCenter {
         bodyParams.put("videoCallback",HttpUrl.VIDEO_CALLBACK);*/
         /*bodyParams.put("chunk", String.valueOf(chunk));
         bodyParams.put("chunks", String.valueOf(chunks));*/
-        new MultipartUploadCenter(context,HttpConstants.UPLOAD_PIC,HttpConstants.MERGE_PIC,bodyParams,uri);
+        MultipartUploadCenter.getInstance()
+                .setUp(context,
+                        HttpConstants.UPLOAD_PIC,
+                        HttpConstants.MERGE_PIC,
+                        bodyParams,
+                        null,
+                        uri,
+                        BuildConfig.DEBUG,
+                        listener)
+                .startTasks();
     }
 }

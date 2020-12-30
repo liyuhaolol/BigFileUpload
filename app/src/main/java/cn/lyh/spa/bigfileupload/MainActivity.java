@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import cn.lyh.spa.bigfileupload.network.RequestCenter;
 import cn.lyh.spa.bigfileupload.utils.MIOUtils;
 import cn.lyh.spa.bigfileupload.utils.MMM;
 import cn.lyh.spa.bigfileupload.utils.fenpian.MultipartUploadCenter;
+import cn.lyh.spa.bigfileupload.utils.fenpian.UploadTaskListener;
 import cn.lyh.spa.bigfileupload.utils.test.FenPian;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5utils;
@@ -89,7 +91,22 @@ public class MainActivity extends PermissionActivity {
     }
 
     private void uploadFile(){
-        RequestCenter.uploadPic(this,MIOUtils.upvideotimeStamp(),uri);
+        RequestCenter.uploadPic(this, MIOUtils.upvideotimeStamp(), uri, new UploadTaskListener() {
+            @Override
+            public void onSuccess(String url) {
+                Log.e("qwer","成功:"+url);
+            }
+
+            @Override
+            public void onFailure(String msg) {
+                Log.e("qwer","失败");
+            }
+
+            @Override
+            public void onProgress() {
+
+            }
+        });
 
 
         /*center = new BigFileUploadCenter( url,filePath,true, new DisposeUploadListener() {
