@@ -88,8 +88,8 @@ public class FilePartUploadThread extends Thread implements Runnable{
                 Thread.sleep(5000);//延迟5秒等待被结束
             }
         }catch (Exception e){
-
         }
+        release();
     }
 
 
@@ -128,12 +128,6 @@ public class FilePartUploadThread extends Thread implements Runnable{
         });
         multipartBodyBuilder.addFormDataPart("file",fileName,requestBody);
         body = multipartBodyBuilder.build();
-
-        try{
-            Log.e("qwer","第"+chunk+"片："+mPiceRealSize+"request大小："+requestBody.contentLength());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
 
         //添加请求头
         Headers.Builder mHeaderBuild = new Headers.Builder();
@@ -201,4 +195,20 @@ public class FilePartUploadThread extends Thread implements Runnable{
         }
     }
 
+    private void release(){
+        pieceSize = 0;
+        chunk = 0;
+        fis = null;
+        mPiceRealSize = 0;
+        handler = null;
+        body = null;
+        bodyParams = null;
+        headerParams = null;
+        url = null;
+        fileName = null;
+        mCurrentCall = null;
+        context = null;
+        mResponse = null;
+        shouldLock = false;
+    }
 }

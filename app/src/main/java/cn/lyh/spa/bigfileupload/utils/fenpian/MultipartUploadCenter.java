@@ -26,29 +26,71 @@ import spa.lyh.cn.lib_https.request.RequestParams;
 import spa.lyh.cn.utils_io.IOUtils;
 
 public class MultipartUploadCenter {
-    private final static String TAG = "MultipartUploadCenter";
+    public final static String TAG = "MultipartUploadCenter";
     public final static int TASK_SUCCESS = 1000;//上传任务结束
     public final static int TASK_FAIL = 1001;//上传任务失败
-    public final static int MULT_PART_FAIL = 1002;//单片上传失败
-    public final static int MULT_PART_PROGRESS = 1003;//分片进度回调
-    public final static int MERGE_FINISH = 1004;//上传任务失败
-    /*public final static int TASK_FAIL = 1001;//上传任务失败
-    public final static int TASK_FAIL = 1001;//上传任务失败
-    public final static int TASK_FAIL = 1001;//上传任务失败*/
+    public final static int TASK_CANCAL = 1002;//上传任务取消
+    public final static int MULT_PART_FAIL = 1003;//单片上传失败
+    public final static int MULT_PART_PROGRESS = 1004;//分片进度回调
+    public final static int MERGE_SUCCESS = 1005;//合并成功
+    public final static int MERGE_FAIL = 1006;//合并失败
     private final Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message msg) {
+            String info;
             switch (msg.what){
                 case TASK_SUCCESS:
                     //线程池任务结束，开始调用合并接口
                     mergeTask();
                     break;
-                case MERGE_FINISH:
+                case TASK_FAIL:
+                    if (listener != null){
+                        listener.onFailure(TASK_FAIL,"");
+                    }
+                    if (isDev){
+                        Log.e(TAG,"上传任务失败");
+                    }
+                    release();
+                    break;
+                case TASK_CANCAL:
+                    if (listener != null){
+                        listener.onFailure(TASK_CANCAL,"");
+                    }
+                    if (isDev){
+                        Log.e(TAG,"任务取消");
+                    }
+                    release();
+                    break;
+                case MERGE_SUCCESS:
                     //整个任务结束，释放资源
+                    info = (String) msg.obj;
+                    if (listener != null){
+                        listener.onSuccess(info);
+                    }
                     if (isDev){
                         Log.e(TAG,"任务结束，释放资源");
                     }
                     release();
+                    break;
+                case MERGE_FAIL:
+                    //合并失败，释放资源
+                    info = (String) msg.obj;
+                    if (listener != null){
+                        listener.onFailure(MERGE_FAIL,info);
+                    }
+                    if (isDev){
+                        Log.e(TAG,"合并失败，释放资源");
+                    }
+                    release();
+                    break;
+                case MULT_PART_FAIL:
+                    if (listener != null){
+                        info = (String) msg.obj;
+                        if (!TextUtils.isEmpty(info)){
+                            listener.onFailure(MULT_PART_FAIL,info);
+                        }
+                    }
+                    stopTasks();
                     break;
                 case MULT_PART_PROGRESS:
                     long multPart = (long) msg.obj;
@@ -61,8 +103,7 @@ public class MultipartUploadCenter {
                         lastProgress = currentSize;
                         p = new Progress(true,lastProgress,convertFileSize(currentLength),convertFileSize(fileSize));
                         if (isDev){
-                            //Log.e(TAG,p.getProgress()+"%   "+p.getCurrentSize()+"/"+p.getSumSize());
-                            Log.e(TAG,p.getProgress()+"%   "+currentLength+"/"+fileSize);
+                            Log.e(TAG,p.getProgress()+"%   "+p.getCurrentSize()+"/"+p.getSumSize());
                         }
                         if (listener != null){
                             listener.onProgress(p);
@@ -272,7 +313,7 @@ public class MultipartUploadCenter {
                     pool.start();
                     sendMsg(MULT_PART_PROGRESS,0);
                 }else {
-                    Log.e("qwer","任务正在进行，请不要重复启动");
+                    Log.e(TAG,"任务正在进行，请不要重复启动");
                 }
             }
 
@@ -281,9 +322,15 @@ public class MultipartUploadCenter {
         }
     }
 
-    public void stopTasks(){
+    private void stopTasks(){
         if (pool != null){
-            pool.stopPoolThread();
+            pool.stopPoolThread(TASK_FAIL);
+        }
+    }
+
+    public void cancalTasks(){
+        if (pool != null){
+            pool.stopPoolThread(TASK_CANCAL);
         }
     }
 
@@ -297,28 +344,22 @@ public class MultipartUploadCenter {
             public void onSuccess(Object responseObj) {
                 Result result = (Result) responseObj;
                 if (result.code == 200){
-                    if (listener != null){
-                        if (result.info != null){
-                            listener.onSuccess(result.info.url);
-                        }else {
-                            listener.onSuccess("");
-                        }
+                    String info;
+                    if (!TextUtils.isEmpty(result.info.url)){
+                        info = result.info.url;
+                    }else {
+                        info = "";
+                    }
+                    sendMsg(MultipartUploadCenter.MERGE_SUCCESS,info);
 
-                    }
                 }else {
-                    if (listener != null){
-                        listener.onFailure(MERGE_MSG+" Code:"+result.code);
-                    }
+                    sendMsg(MultipartUploadCenter.MERGE_FAIL,MERGE_MSG+" Code:"+result.code);
                 }
-                sendMsg(MultipartUploadCenter.MERGE_FINISH);
             }
 
             @Override
             public void onFailure(Object reasonObj) {
-                if (listener != null){
-                    listener.onFailure(MERGE_MSG);
-                }
-                sendMsg(MultipartUploadCenter.MERGE_FINISH);
+                sendMsg(MultipartUploadCenter.MERGE_FAIL,MERGE_MSG);
             }
         }, typeReference, isDev));
     }
@@ -411,6 +452,15 @@ public class MultipartUploadCenter {
         Message msg = Message.obtain();
         msg.what = what;
         msg.obj = bytelength;
+        if (handler != null){
+            handler.sendMessage(msg);
+        }
+    }
+
+    private void sendMsg(int what,String info){
+        Message msg = Message.obtain();
+        msg.what = what;
+        msg.obj = info;
         if (handler != null){
             handler.sendMessage(msg);
         }

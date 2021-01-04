@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,9 +16,9 @@ import cn.lyh.spa.bigfileupload.utils.test.Mthread;
 import spa.lyh.cn.lib_https.request.RequestParams;
 
 public class ThreadPool extends Thread{
-    ExecutorService service;
+    private ExecutorService service;
 
-    private final Handler handler;
+    private Handler handler;
     private Object res;
     private int threads;
     private long chunks;
@@ -26,6 +27,7 @@ public class ThreadPool extends Thread{
     private String fileName;
     private String url;
     private RequestParams bodyParams,headerParams;
+    private int mode;
 
     public ThreadPool(Context context,Handler handler, Object res, int threads, long chunks, int pieceSize,String fileName,String url,RequestParams bodyParams,RequestParams headerParams){
         this.handler = handler;
@@ -54,15 +56,34 @@ public class ThreadPool extends Thread{
         }
 
         Message msg = Message.obtain();
-        msg.what = MultipartUploadCenter.TASK_SUCCESS;
+        if (mode == MultipartUploadCenter.TASK_CANCAL){
+            //取消
+            msg.what = MultipartUploadCenter.TASK_CANCAL;
+        }else if (mode == MultipartUploadCenter.TASK_FAIL){
+            //失败
+            msg.what = MultipartUploadCenter.TASK_FAIL;
+        }else {
+            //执行完毕
+            msg.what = MultipartUploadCenter.TASK_SUCCESS;
+        }
+
         if (handler != null){
             handler.sendMessage(msg);
         }
+        release();
 
     }
 
-    public void stopPoolThread(){
+    public void stopPoolThread(int mode){
         if (service != null && !service.isTerminated()){
+            if (mode == MultipartUploadCenter.TASK_FAIL){
+                this.mode = MultipartUploadCenter.TASK_FAIL;
+            }else if (mode == MultipartUploadCenter.TASK_CANCAL){
+                this.mode = MultipartUploadCenter.TASK_CANCAL;
+            }else {
+                Log.e(MultipartUploadCenter.TAG,"停止线程池参数不对，不能停止任务");
+                return;
+            }
             service.shutdownNow();
         }
     }
@@ -81,6 +102,22 @@ public class ThreadPool extends Thread{
 
         }
         return fis;
+    }
+
+    private void release(){
+        service = null;
+
+        handler = null;
+        res = null;
+        threads = 0;
+        chunks = 0;
+        pieceSize = 0;
+        context = null;
+        fileName = null;
+        url = null;
+        bodyParams = null;
+        headerParams = null;
+        mode = 0;
     }
 
 }

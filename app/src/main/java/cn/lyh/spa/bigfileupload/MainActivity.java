@@ -81,6 +81,7 @@ public class MainActivity extends PermissionActivity {
                 break;
             case R.id.stop:
                 //center.stopUpload();
+                MultipartUploadCenter.getInstance().cancalTasks();
                 break;
             case R.id.android10:
                 if (uri != null){
@@ -100,7 +101,7 @@ public class MainActivity extends PermissionActivity {
             }
 
             @Override
-            public void onFailure(String msg) {
+            public void onFailure(int status,String msg) {
                 Log.e("qwer","失败");
             }
 
