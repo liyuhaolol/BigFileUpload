@@ -20,7 +20,6 @@ import cn.lyh.spa.bigfileupload.utils.MIOUtils;
 import cn.lyh.spa.bigfileupload.utils.MMM;
 import cn.lyh.spa.bigfileupload.utils.fenpian.MultipartUploadCenter;
 import cn.lyh.spa.bigfileupload.utils.fenpian.UploadTaskListener;
-import cn.lyh.spa.bigfileupload.utils.test.FenPian;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5utils;
 import spa.lyh.cn.lib_https.model.Progress;
@@ -31,13 +30,7 @@ public class MainActivity extends PermissionActivity {
 
     private String stringPath;
 
-    private String md5String;
-
-    private long startOffSet = 0;
-
     Uri uri;
-
-    MultipartUploadCenter center;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,25 +63,12 @@ public class MainActivity extends PermissionActivity {
                 startActivityForResult(intent, 1);
                 break;
             case R.id.start:
-                /*if (!TextUtils.isEmpty(path.getText().toString())){
-
-                    md5String = md5T.getText().toString();
-                    uploadFile(HttpConstants.UPLOAD_URL,stringPath);
-                }*/
                 if (uri != null){
                     uploadFile();
                 }
                 break;
             case R.id.stop:
-                //center.stopUpload();
                 MultipartUploadCenter.getInstance().cancalTasks();
-                break;
-            case R.id.android10:
-                if (uri != null){
-                    FenPian.test(this,uri);
-                }else {
-                    showToast("没有文件信息");
-                }
                 break;
         }
     }
@@ -107,36 +87,8 @@ public class MainActivity extends PermissionActivity {
 
             @Override
             public void onProgress(Progress progress) {
-                //Log.e("qwer",progress.getProgress()+"");
-                //showToast(progress.getProgress()+"");
             }
         });
-
-
-        /*center = new BigFileUploadCenter( url,filePath,true, new DisposeUploadListener() {
-            @Override
-            public void onPiceSuccess(int progress, String currentSize, String sumSize) {
-                process.setText(progress+"%");
-                size.setText(currentSize+"/"+sumSize);
-            }
-
-            @Override
-            public void onSuccess(String response) {
-                showToast("上传成功");
-            }
-
-            @Override
-            public void onFailure(String reason) {
-                showToast(reason);
-            }
-
-            @Override
-            public void onCancel(long startOffset) {
-                showToast("上传停止");
-                startOffSet = startOffset;
-            }
-        });
-        center.start(startOffSet);*/
     }
 
 

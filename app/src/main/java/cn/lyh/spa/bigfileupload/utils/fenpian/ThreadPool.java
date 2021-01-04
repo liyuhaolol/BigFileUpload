@@ -12,7 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import cn.lyh.spa.bigfileupload.utils.MIOUtils;
-import cn.lyh.spa.bigfileupload.utils.test.Mthread;
 import spa.lyh.cn.lib_https.request.RequestParams;
 
 public class ThreadPool extends Thread{
