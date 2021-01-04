@@ -2,6 +2,7 @@ package cn.lyh.spa.bigfileupload.utils.fenpian;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -14,12 +15,15 @@ import androidx.documentfile.provider.DocumentFile;
 import com.alibaba.fastjson.TypeReference;
 
 import java.io.File;
+import java.text.DecimalFormat;
 
 import spa.lyh.cn.lib_https.HttpClient;
 import spa.lyh.cn.lib_https.listener.DisposeDataHandle;
 import spa.lyh.cn.lib_https.listener.DisposeDataListener;
+import spa.lyh.cn.lib_https.model.Progress;
 import spa.lyh.cn.lib_https.request.CommonRequest;
 import spa.lyh.cn.lib_https.request.RequestParams;
+import spa.lyh.cn.utils_io.IOUtils;
 
 public class MultipartUploadCenter {
     private final static String TAG = "MultipartUploadCenter";
@@ -46,10 +50,37 @@ public class MultipartUploadCenter {
                     }
                     release();
                     break;
+                case MULT_PART_PROGRESS:
+                    long multPart = (long) msg.obj;
+                    currentLength += multPart;
+                    //计算百分比
+                    mProgress = getNumber((float)currentLength/(float)fileSize)*100;
+                    int currentSize = (int) mProgress;
+                    //判断整型进度去重只传100次0到100
+                    if (currentSize != lastProgress){
+                        lastProgress = currentSize;
+                        p = new Progress(true,lastProgress,convertFileSize(currentLength),convertFileSize(fileSize));
+                        if (isDev){
+                            //Log.e(TAG,p.getProgress()+"%   "+p.getCurrentSize()+"/"+p.getSumSize());
+                            Log.e(TAG,p.getProgress()+"%   "+currentLength+"/"+fileSize);
+                        }
+                        if (listener != null){
+                            listener.onProgress(p);
+                        }
+                    }
+                    break;
             }
             return true;
         }
     });
+    private long currentLength;
+
+    private int lastProgress = -1;
+
+    private float mProgress;
+
+    private Progress p;
+
     private String errorTag;
 
     private Context context;
@@ -78,6 +109,8 @@ public class MultipartUploadCenter {
 
     private UploadTaskListener listener;
 
+    private static String android = "/Android";//内部路径
+
     private static MultipartUploadCenter instance;
 
     public static MultipartUploadCenter getInstance(){
@@ -104,11 +137,22 @@ public class MultipartUploadCenter {
         this.headerParams = headerParams;
         this.isDev = isDev;
         this.listener = listener;
-        if (res instanceof String){}else if (res instanceof File){}else if (res instanceof Uri){}else {
+        if (res instanceof String){
+            String storagePath = Environment.getExternalStorageDirectory().getPath();
+            String path = (String) res;
+            if (path.startsWith(storagePath+android)){
+                //进入私有存储空间,使用File操作
+                this.res = new File(path);
+            }else {
+                //外部存储空间，使用Uri操作
+                this.res = IOUtils.getFileUri(context,path);
+            }
+        }else if (res instanceof File || res instanceof Uri){
+            this.res = res;
+        }else {
             Log.e(TAG,"上传文件只能为String型路径，File型文件，Uri型文件");
         }
-        this.res = res;
-        initFileInfo(null);
+        initFileInfo(res);
         prepare();//发送前准备工作
         return this;
     }
@@ -144,15 +188,30 @@ public class MultipartUploadCenter {
         bodyParams.put("chunks", String.valueOf(chunks));//加入总片数参数
     }
 
-    private void initFileInfo(Uri uri){
-        documentFile = DocumentFile.fromSingleUri(context, uri);
-        if (documentFile != null){
-            fileName = documentFile.getName();
-            fileSize = documentFile.length();
-            bodyParams.put("fileOriName",fileName);
-            bodyParams.put("videoName",fileName );
+    private void initFileInfo(Object res){
+        if (res instanceof File){
+            File file = (File) res;
+            if (file.exists()){
+                fileName = file.getName();
+                fileSize = file.length();
+                bodyParams.put("fileOriName",fileName);
+                bodyParams.put("videoName",fileName );
+            }else {
+                Log.e(TAG,"文件不存在");
+            }
+        }else if (res instanceof Uri){
+            Uri uri = (Uri) res;
+            documentFile = DocumentFile.fromSingleUri(context, uri);
+            if (documentFile != null){
+                fileName = documentFile.getName();
+                fileSize = documentFile.length();
+                bodyParams.put("fileOriName",fileName);
+                bodyParams.put("videoName",fileName );
+            }else {
+                Log.e(TAG,"DocumentFile未能正确获取");
+            }
         }else {
-            Log.e(TAG,"DocumentFile未能正确获取");
+            Log.e(TAG,"未能初始化文件信息");
         }
     }
 
@@ -206,10 +265,12 @@ public class MultipartUploadCenter {
             if (pool == null){
                 pool = new ThreadPool(context,handler,res,number,chunks,pieceSize,fileName,uploadUrl,bodyParams,headerParams);
                 pool.start();
+                sendMsg(MULT_PART_PROGRESS,0);
             }else {
                 if (!pool.isAlive()){
                     pool = new ThreadPool(context,handler,res,number,chunks,pieceSize,fileName,uploadUrl,bodyParams,headerParams);
                     pool.start();
+                    sendMsg(MULT_PART_PROGRESS,0);
                 }else {
                     Log.e("qwer","任务正在进行，请不要重复启动");
                 }
@@ -293,12 +354,63 @@ public class MultipartUploadCenter {
         documentFile = null;
 
         isDev = false;
+
+        currentLength = 0;
+
+        lastProgress = -1;
+
+        mProgress = 0;
+
+        p = null;
+    }
+
+    /**
+     * 得到对应位数小数<P/>
+     * Created by liyuhao on 2016/3/24.<P/>
+     * @param number float的数
+     * @return float的数
+     */
+    public float getNumber(float number){
+        DecimalFormat df = new DecimalFormat("#.##############");
+        float f=Float.valueOf(df.format(number));
+        return f;
+    }
+
+    /**
+     * 计算文件大小<P/>
+     * Created by liyuhao on 2016/3/24.<P/>
+     * @param size 字节数
+     * @return 对应的G，M，K
+     */
+    private String convertFileSize(long size) {
+        long kb = 1024;
+        long mb = kb * 1024;
+        long gb = mb * 1024;
+
+        if (size >= gb) {
+            return String.format("%.2f GB", (float) size / gb);
+        } else if (size >= mb) {
+            float f = (float) size / mb;
+            return String.format(f > 100 ? "%.0f MB" : "%.2f MB", f);
+        } else if (size >= kb) {
+            float f = (float) size / kb;
+            return String.format(f > 100 ? "%.0f KB" : "%.2f KB", f);
+        } else
+            return String.format("%d B", size);
     }
 
 
     private void sendMsg(int what){
         Message msg = Message.obtain();
         msg.what = what;
+        if (handler != null){
+            handler.sendMessage(msg);
+        }
+    }
+    private void sendMsg(int what,long bytelength){
+        Message msg = Message.obtain();
+        msg.what = what;
+        msg.obj = bytelength;
         if (handler != null){
             handler.sendMessage(msg);
         }

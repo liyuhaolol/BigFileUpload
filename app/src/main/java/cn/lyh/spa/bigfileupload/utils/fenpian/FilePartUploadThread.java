@@ -32,7 +32,7 @@ public class FilePartUploadThread extends Thread implements Runnable{
     private FileInputStream fis;
     private int mPiceRealSize;
     private Handler handler;
-    private UploadProgressRequestBody body;
+    private MultipartBody body;
     private RequestParams bodyParams,headerParams;
     private String url;
     private String fileName;
@@ -120,8 +120,21 @@ public class FilePartUploadThread extends Thread implements Runnable{
                 multipartBodyBuilder.addFormDataPart(entry.getKey(), entry.getValue());
             }
         }
-        RequestBody requestBody = RequestBody.create(datas, MediaType.parse("application/octet-stream"),0,mPiceRealSize);
+        PieceRequestBody requestBody = new PieceRequestBody(datas, mPiceRealSize, new MultpartListener() {
+            @Override
+            public void onPiece(long piece) {
+                sendMsg(MultipartUploadCenter.MULT_PART_PROGRESS,piece);
+            }
+        });
         multipartBodyBuilder.addFormDataPart("file",fileName,requestBody);
+        body = multipartBodyBuilder.build();
+
+        try{
+            Log.e("qwer","第"+chunk+"片："+mPiceRealSize+"request大小："+requestBody.contentLength());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         //添加请求头
         Headers.Builder mHeaderBuild = new Headers.Builder();
         if (headerParams != null) {
@@ -129,16 +142,9 @@ public class FilePartUploadThread extends Thread implements Runnable{
                 mHeaderBuild.add(entry.getKey(), entry.getValue());
             }
         }
-
         //生成header
         Headers mHeader = mHeaderBuild.build();
-        body =new UploadProgressRequestBody(multipartBodyBuilder.build(), false, new UploadProgressListener() {
-            @Override
-            public void onProgress(int progress) {
-                float percent = (float)progress / 100;
-                Log.e("qwer",chunk+"片进度："+percent);
-            }
-        });
+
 
         Request request = new Request.Builder()
                 .url(url)
@@ -186,5 +192,13 @@ public class FilePartUploadThread extends Thread implements Runnable{
         }
     }
 
+    private void sendMsg(int what,long bytelength){
+        Message msg = Message.obtain();
+        msg.what = what;
+        msg.obj = bytelength;
+        if (handler != null){
+            handler.sendMessage(msg);
+        }
+    }
 
 }

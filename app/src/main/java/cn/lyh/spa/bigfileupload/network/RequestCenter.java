@@ -61,13 +61,8 @@ public class RequestCenter {
         //传图片用的参数
         bodyParams.put("siteId", String.valueOf(1));
         bodyParams.put("identification", identification);
-        //bodyParams.put("videoIdentification", identification);
-        //
-        //bodyParams.put("fileOriName",a);
-        /*bodyParams.put("videoName",a );
-        bodyParams.put("videoCallback",HttpUrl.VIDEO_CALLBACK);*/
-        /*bodyParams.put("chunk", String.valueOf(chunk));
-        bodyParams.put("chunks", String.valueOf(chunks));*/
+        bodyParams.put("videoIdentification", identification);
+        bodyParams.put("videoCallback",HttpConstants.VIDEO_CALLBACK);
         MultipartUploadCenter.getInstance()
                 .setUp(context,
                         HttpConstants.UPLOAD_PIC,

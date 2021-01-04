@@ -23,6 +23,7 @@ import cn.lyh.spa.bigfileupload.utils.fenpian.UploadTaskListener;
 import cn.lyh.spa.bigfileupload.utils.test.FenPian;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5utils;
+import spa.lyh.cn.lib_https.model.Progress;
 import spa.lyh.cn.peractivity.PermissionActivity;
 
 public class MainActivity extends PermissionActivity {
@@ -104,8 +105,9 @@ public class MainActivity extends PermissionActivity {
             }
 
             @Override
-            public void onProgress() {
-
+            public void onProgress(Progress progress) {
+                //Log.e("qwer",progress.getProgress()+"");
+                //showToast(progress.getProgress()+"");
             }
         });
 
