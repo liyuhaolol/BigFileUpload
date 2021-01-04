@@ -26,7 +26,7 @@ import spa.lyh.cn.lib_https.model.Progress;
 import spa.lyh.cn.peractivity.PermissionActivity;
 
 public class MainActivity extends PermissionActivity {
-    private TextView path,process,md5T,size;
+    private TextView path,process,md5T,size,url;
 
     private String stringPath;
 
@@ -41,6 +41,7 @@ public class MainActivity extends PermissionActivity {
         path.setText(stringPath);
         process = findViewById(R.id.process);
         size = findViewById(R.id.size);
+        url = findViewById(R.id.url);
         md5T = findViewById(R.id.md5);
         MD5utils.getFileMD5sync(this,path.getText().toString(), new MD5resultListener() {
             @Override
@@ -76,17 +77,19 @@ public class MainActivity extends PermissionActivity {
     private void uploadFile(){
         RequestCenter.uploadPic(this, MIOUtils.upvideotimeStamp(), uri, new UploadTaskListener() {
             @Override
-            public void onSuccess(String url) {
-                Log.e("qwer","成功:"+url);
+            public void onSuccess(String info) {
+                url.setText(info);
             }
 
             @Override
             public void onFailure(int status,String msg) {
-                Log.e("qwer","失败");
+                url.setText(msg);
             }
 
             @Override
             public void onProgress(Progress progress) {
+                process.setText(progress.getProgress()+"%");
+                size.setText(progress.getCurrentSize()+"/"+progress.getSumSize());
             }
         });
     }

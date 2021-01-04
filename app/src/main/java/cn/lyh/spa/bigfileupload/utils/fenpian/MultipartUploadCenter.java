@@ -304,11 +304,13 @@ public class MultipartUploadCenter {
     public void startTasks(){
         if (checkCanStart()){
             if (pool == null){
+                showFileinfo();
                 pool = new ThreadPool(context,handler,res,number,chunks,pieceSize,fileName,uploadUrl,bodyParams,headerParams);
                 pool.start();
                 sendMsg(MULT_PART_PROGRESS,0);
             }else {
                 if (!pool.isAlive()){
+                    showFileinfo();
                     pool = new ThreadPool(context,handler,res,number,chunks,pieceSize,fileName,uploadUrl,bodyParams,headerParams);
                     pool.start();
                     sendMsg(MULT_PART_PROGRESS,0);
@@ -331,6 +333,18 @@ public class MultipartUploadCenter {
     public void cancalTasks(){
         if (pool != null){
             pool.stopPoolThread(TASK_CANCAL);
+        }
+    }
+
+    private void showFileinfo(){
+        if (isDev){
+            Log.e(TAG,"文件名："+fileName);
+            Log.e(TAG,"文件大小："+convertFileSize(fileSize)+",字节数："+fileSize);
+            Log.e(TAG,"单片大小："+convertFileSize(pieceSize)+",字节数："+pieceSize);
+            Log.e(TAG,"总分片片数："+chunks);
+            Log.e(TAG,"线程池大小："+number);
+            Log.e(TAG,"分片上传链接："+uploadUrl);
+            Log.e(TAG,"分片合并链接："+mergeUrl);
         }
     }
 
