@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,14 +15,14 @@ import androidx.annotation.Nullable;
 import java.io.FileInputStream;
 
 import cn.lyh.spa.bigfileupload.network.RequestCenter;
-import cn.lyh.spa.bigfileupload.utils.MIOUtils;
-import cn.lyh.spa.bigfileupload.utils.MMM;
-import cn.lyh.spa.bigfileupload.utils.fenpian.MultipartUploadCenter;
-import cn.lyh.spa.bigfileupload.utils.fenpian.UploadTaskListener;
+import cn.lyh.spa.bigfileupload.utils.TimeUtils;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5resultListener;
 import cn.lyh.spa.bigfileupload.utils.md5.MD5utils;
+import spa.lyh.cn.lib_https.MultipartUploadCenter;
+import spa.lyh.cn.lib_https.listener.UploadTaskListener;
 import spa.lyh.cn.lib_https.model.Progress;
 import spa.lyh.cn.peractivity.PermissionActivity;
+import spa.lyh.cn.utils_io.IOUtils;
 
 public class MainActivity extends PermissionActivity {
     private TextView path,process,md5T,size,url;
@@ -75,7 +74,7 @@ public class MainActivity extends PermissionActivity {
     }
 
     private void uploadFile(){
-        RequestCenter.uploadPic(this, MIOUtils.upvideotimeStamp(), uri, new UploadTaskListener() {
+        RequestCenter.uploadPic(this, TimeUtils.upvideotimeStamp(), uri, new UploadTaskListener() {
             @Override
             public void onSuccess(String info) {
                 url.setText(info);
@@ -104,10 +103,10 @@ public class MainActivity extends PermissionActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             uri = data.getData();
-            stringPath = MMM.getFilePathByUri(this, uri);
+            stringPath = IOUtils.getFilePath(this, uri);
             path.setText(stringPath);
 
-            FileInputStream fis = MIOUtils.getFileInPutStream(this,uri);
+            FileInputStream fis = IOUtils.getFileInPutStream(this,uri);
             if (fis != null){
                 MD5utils.getFileMD5sync(fis, new MD5resultListener() {
                     @Override

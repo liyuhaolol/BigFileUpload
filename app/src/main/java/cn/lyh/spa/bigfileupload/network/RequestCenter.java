@@ -1,66 +1,29 @@
 package cn.lyh.spa.bigfileupload.network;
 
-
-import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
-import android.os.HandlerThread;
-
-import com.alibaba.fastjson.TypeReference;
-
-import java.io.File;
 
 import cn.lyh.spa.bigfileupload.BuildConfig;
-import cn.lyh.spa.bigfileupload.utils.fenpian.MultipartUploadCenter;
-import cn.lyh.spa.bigfileupload.utils.fenpian.UploadTaskListener;
-import okhttp3.Call;
-import spa.lyh.cn.lib_https.HttpClient;
-import spa.lyh.cn.lib_https.listener.DisposeDataHandle;
-import spa.lyh.cn.lib_https.listener.DisposeDataListener;
-import spa.lyh.cn.lib_https.request.CommonRequest;
+import spa.lyh.cn.lib_https.MultipartUploadCenter;
+import spa.lyh.cn.lib_https.listener.UploadTaskListener;
 import spa.lyh.cn.lib_https.request.RequestParams;
 
 
 public class RequestCenter {
 
 
-
-
-    private static Call postRequest(Activity activity,String url, RequestParams params, RequestParams headers, final DisposeDataListener listener, TypeReference<?> typeReference) {
-        //创建网络请求
-        Call call = HttpClient.getInstance(activity).sendResquest(CommonRequest.
-                createPostRequest(url,params,headers,true),new DisposeDataHandle(new DisposeDataListener() {
-            @Override
-            public void onSuccess(Object responseObj) {
-                listener.onSuccess(responseObj);
-            }
-
-            @Override
-            public void onFailure(Object reasonObj) {
-                listener.onFailure(reasonObj);
-            }
-        }));
-
-        return call;
-    }
-
-
-    /*public static void uploadBigFile(String path , DisposeUploadListener listener){
-        HandlerThread thread = new HandlerThread("1");
-    }*/
-
-
-
-    //这里暂时优先使用uri。后期补充。
-    public static void uploadPic(Context context, String identification, Uri uri, UploadTaskListener listener){
+    //大文件上传并不是通用方法，只能用在目前的后台大文件逻辑上
+    public static void uploadPic(Context context, String identification, Object res, UploadTaskListener listener){
         RequestParams bodyParams = new RequestParams();
-
-        /*bodyParams.put("videoIdentification", id);
-
-         */
-        //传图片用的参数
+        //已经封装入框架的参数
+        //chunk 第几片
+        //chunks 总片数
+        //fileOriName 文件名
+        //videoName 文件名
+        //共用参数
         bodyParams.put("siteId", String.valueOf(1));
+        //传图片用的参数
         bodyParams.put("identification", identification);
+        //传视频的参数
         bodyParams.put("videoIdentification", identification);
         bodyParams.put("videoCallback",HttpConstants.VIDEO_CALLBACK);
         MultipartUploadCenter.getInstance()
@@ -69,7 +32,7 @@ public class RequestCenter {
                         HttpConstants.MERGE_PIC,
                         bodyParams,
                         null,
-                        uri,
+                        res,
                         BuildConfig.DEBUG,
                         listener)
                 .startTasks();
